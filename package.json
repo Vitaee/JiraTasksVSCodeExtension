@@ -2,7 +2,7 @@
   "name": "jira-tasks-vscode-extension",
   "displayName": "Jira Tasks Generator",
   "description": "Generate Jira task drafts from git changes.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "canilgu",
   "repository": {"url": "https://github.com/Vitaee/JiraTasksVSCodeExtension"},
   "engines": {
