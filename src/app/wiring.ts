@@ -6,8 +6,12 @@ import { MarkdownStorageAdapter } from "../adapters/storage/markdownStorageAdapt
 import { VsCodeFileSystem } from "../adapters/vscode/vscodeFileSystem";
 import { VsCodeSecretStore } from "../adapters/vscode/vscodeSecretStore";
 import { ExtensionSettings, readSettings } from "../config/settings";
-import { JIRA_TASK_PROMPT_TEMPLATE } from "../domain/prompts/jiraTaskPrompt";
+import {
+  DEFAULT_JIRA_TASK_PROMPT_TEMPLATE,
+  JIRA_TASK_PROMPT_TEMPLATE,
+} from "../domain/prompts/jiraTaskPrompt";
 import { JIRA_TASK_REPAIR_PROMPT_TEMPLATE } from "../domain/prompts/jiraTaskRepairPrompt";
+import { FileSystemPort } from "../domain/ports/fileSystemPort";
 import { ContextPruner } from "../domain/services/contextPruner";
 import { JiraTaskParser } from "../domain/services/jiraTaskParser";
 import { PromptBuilder } from "../domain/services/promptBuilder";
@@ -27,6 +31,29 @@ export async function buildLlmClient(
 ) {
   const secrets = new VsCodeSecretStore(context.secrets);
   return await createLlmStrategy(settings, secrets);
+}
+
+/**
+ * Attempts to load a custom prompt template from the workspace.
+ * Checks .vscode/jira-prompt.hbs and jira-prompt.hbs in order.
+ */
+async function loadPromptTemplate(fs: FileSystemPort): Promise<string> {
+  const customPaths = [".vscode/jira-prompt.hbs", "jira-prompt.hbs"];
+
+  for (const path of customPaths) {
+    if (await fs.exists(path)) {
+      try {
+        const content = await fs.readText(path);
+        if (content.trim()) {
+          return content;
+        }
+      } catch {
+        // File exists but couldn't be read, continue to next
+      }
+    }
+  }
+
+  return DEFAULT_JIRA_TASK_PROMPT_TEMPLATE;
 }
 
 export async function buildTaskGenerator(
@@ -55,7 +82,8 @@ export async function buildTaskGenerator(
     maxCharsPerFile: settings.maxCharsPerFile,
   });
 
-  const promptBuilder = new PromptBuilder(JIRA_TASK_PROMPT_TEMPLATE);
+  const promptTemplate = await loadPromptTemplate(fileSystem);
+  const promptBuilder = new PromptBuilder(promptTemplate);
   const repairPromptBuilder = new RepairPromptBuilder(
     JIRA_TASK_REPAIR_PROMPT_TEMPLATE
   );

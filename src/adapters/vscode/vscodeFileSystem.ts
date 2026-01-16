@@ -24,6 +24,16 @@ export class VsCodeFileSystem implements FileSystemPort {
     }
   }
 
+  async exists(path: string): Promise<boolean> {
+    const uri = this.resolvePath(path);
+    try {
+      await vscode.workspace.fs.stat(uri);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private resolvePath(path: string): vscode.Uri {
     return vscode.Uri.joinPath(this.workspaceRoot, path);
   }

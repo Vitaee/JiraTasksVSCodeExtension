@@ -8,6 +8,7 @@ import { ContextPruner } from "./contextPruner";
 import { PromptBuilder } from "./promptBuilder";
 import { RepairPromptBuilder } from "./repairPromptBuilder";
 import { SecretSanitizer } from "./secretSanitizer";
+import { Logger } from "../../shared/logger";
 
 export type GenerateOptions = {
   language: string;
@@ -24,18 +25,35 @@ export class TaskGeneratorService {
     private readonly contextPruner: ContextPruner,
     private readonly promptBuilder: PromptBuilder,
     private readonly secretSanitizer: SecretSanitizer,
-    private readonly repairPromptBuilder: RepairPromptBuilder
+    private readonly repairPromptBuilder: RepairPromptBuilder,
+    private readonly logger?: Logger
   ) {}
 
   async generate(options: GenerateOptions): Promise<JiraTask> {
     const snapshot = await this.git.getDiff({ mode: options.diffMode });
-    const pruned = this.contextPruner.prune(snapshot);
+    const pruneResult = this.contextPruner.prune(snapshot);
 
-    if (pruned.files.length === 0) {
+    if (pruneResult.snapshot.files.length === 0) {
       throw new UserFacingError("No git changes found to analyze.");
     }
 
-    const sanitized = this.secretSanitizer.sanitizeSnapshot(pruned);
+    // Log truncation warnings
+    if (pruneResult.truncatedFiles.length > 0) {
+      const truncatedPaths = pruneResult.truncatedFiles
+        .map((t) => `${t.path} (${t.originalLength} → ${t.truncatedTo} chars)`)
+        .join(", ");
+      this.logger?.warn(
+        `Context truncated: ${pruneResult.truncatedFiles.length} file(s) exceeded limit: ${truncatedPaths}`
+      );
+    }
+
+    if (pruneResult.droppedFilesCount > 0) {
+      this.logger?.warn(
+        `${pruneResult.droppedFilesCount} file(s) dropped due to maxFiles limit`
+      );
+    }
+
+    const sanitized = this.secretSanitizer.sanitizeSnapshot(pruneResult.snapshot);
     const customInstructions = options.customInstructions
       ? this.secretSanitizer.sanitizeText(options.customInstructions)
       : "";

@@ -1,6 +1,6 @@
 import { JIRA_TASK_JSON_SHAPE } from "./jiraTaskSchema";
 
-export const JIRA_TASK_PROMPT_TEMPLATE = `
+export const DEFAULT_JIRA_TASK_PROMPT_TEMPLATE = `
 You are generating a Jira task draft from git changes.
 
 Return ONLY JSON that matches this shape:
@@ -22,3 +22,6 @@ Custom instructions:
 {{customInstructions}}
 {{/if}}
 `;
+
+// Re-export for backwards compatibility
+export const JIRA_TASK_PROMPT_TEMPLATE = DEFAULT_JIRA_TASK_PROMPT_TEMPLATE;

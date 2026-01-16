@@ -56,6 +56,70 @@ Settings live under the `jiraTasks` namespace.
 | `maxCharsPerFile` | `6000` | Max characters per diff file included in the prompt. |
 | `storageFile` | `jira-tasks.md` | Workspace-relative output file. |
 
+## Features
+
+### Context Pruning with Truncation Awareness
+
+When git changes exceed the configured limits, the extension now provides visibility into what data was truncated:
+
+- **Truncation Warnings**: If any file diff exceeds `maxCharsPerFile`, a warning is logged to the Debug Console showing which files were truncated and by how much.
+- **Dropped Files**: If the number of changed files exceeds `maxFiles`, a warning indicates how many files were dropped from the context.
+
+This helps you understand when the LLM might be seeing incomplete information.
+
+### Robust JSON Parsing
+
+The extension now handles common LLM output quirks:
+
+- **Code Fence Variations**: Accepts JSON wrapped in ` ```json `, ` ``` ` (no language), or raw braces.
+- **Trailing Commas**: Automatically strips trailing commas before parsing, a common issue with LLM-generated JSON.
+- **Repair Attempts**: If initial parsing fails, the extension sends a repair prompt to the LLM for a second attempt.
+
+### Custom Prompt Templates
+
+Power users can customize the prompt template by creating a Handlebars file:
+
+1. Create `jira-prompt.hbs` in your workspace root, **or**
+2. Create `.vscode/jira-prompt.hbs` for project-specific customization
+
+The extension checks these locations in order and falls back to the default template.
+
+#### Template Variables
+
+Your custom template has access to these variables:
+
+| Variable | Type | Description |
+| --- | --- | --- |
+| `{{language}}` | string | The configured `promptLanguage` setting |
+| `{{branch}}` | string | Current git branch name |
+| `{{files}}` | array | List of changed files with `path` and `diff` properties |
+| `{{customInstructions}}` | string | The `customInstructions` setting value |
+
+#### Example Custom Template
+
+```handlebars
+You are a senior developer creating a Jira task.
+
+Return ONLY valid JSON with this structure:
+{
+  "summary": "Brief task title",
+  "description": "Detailed description",
+  "acceptanceCriteria": ["Criterion 1", "Criterion 2"]
+}
+
+Language: {{language}}
+Branch: {{branch}}
+
+{{#each files}}
+### {{path}}
+{{diff}}
+{{/each}}
+
+{{#if customInstructions}}
+Additional context: {{customInstructions}}
+{{/if}}
+```
+
 ## Architecture
 ```
 src/
@@ -71,3 +135,4 @@ src/
 - The extension requires an open workspace folder to run.
 - Output is upserted by `## <summary>` heading in the storage file.
 - Bun is used for build/test only; runtime is the VS Code Node host.
+- Truncation and dropped file warnings appear in the VS Code Debug Console.
