@@ -1,0 +1,153 @@
+{
+  "name": "jira-tasks-vscode-extension",
+  "displayName": "Jira Tasks Generator",
+  "description": "Generate Jira task drafts from git changes.",
+  "version": "0.0.1",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:jiraTasks.generate",
+    "onCommand:jiraTasks.setOpenRouterKey",
+    "onCommand:jiraTasks.setGroqKey"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "jiraTasks.generate",
+        "title": "Jira: Generate Task From Git Changes"
+      },
+      {
+        "command": "jiraTasks.setOpenRouterKey",
+        "title": "Jira: Set OpenRouter API Key"
+      },
+      {
+        "command": "jiraTasks.setGroqKey",
+        "title": "Jira: Set Groq API Key"
+      }
+    ],
+    "configuration": {
+      "title": "Jira Tasks Generator",
+      "properties": {
+        "jiraTasks.provider": {
+          "type": "string",
+          "enum": [
+            "openrouter",
+            "groq"
+          ],
+          "default": "openrouter",
+          "description": "LLM provider to use for task generation."
+        },
+        "jiraTasks.openrouterBaseUrl": {
+          "type": "string",
+          "default": "https://openrouter.ai/api/v1",
+          "description": "OpenRouter base URL."
+        },
+        "jiraTasks.openrouterModel": {
+          "type": "string",
+          "default": "nvidia/nemotron-3-nano-30b-a3b:free",
+          "description": "OpenRouter model name."
+        },
+        "jiraTasks.openrouterSiteUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Optional HTTP-Referer header for OpenRouter rankings."
+        },
+        "jiraTasks.openrouterTitle": {
+          "type": "string",
+          "default": "",
+          "description": "Optional X-Title header for OpenRouter rankings."
+        },
+        "jiraTasks.groqModel": {
+          "type": "string",
+          "default": "moonshotai/kimi-k2-instruct-0905",
+          "description": "Groq model name."
+        },
+        "jiraTasks.temperature": {
+          "type": "number",
+          "default": 0.6,
+          "description": "Sampling temperature for LLM calls."
+        },
+        "jiraTasks.maxCompletionTokens": {
+          "type": "number",
+          "default": 4096,
+          "description": "Max completion tokens for LLM calls."
+        },
+        "jiraTasks.topP": {
+          "type": "number",
+          "default": 1,
+          "description": "Top-p nucleus sampling value."
+        },
+        "jiraTasks.promptLanguage": {
+          "type": "string",
+          "default": "en",
+          "description": "Language for generated Jira tasks."
+        },
+        "jiraTasks.customInstructions": {
+          "type": "string",
+          "default": "",
+          "description": "Extra instructions appended to the prompt."
+        },
+        "jiraTasks.diffMode": {
+          "type": "string",
+          "enum": [
+            "staged",
+            "unstaged",
+            "staged+unstaged"
+          ],
+          "default": "staged+unstaged",
+          "description": "Choose which git changes to include."
+        },
+        "jiraTasks.maxFiles": {
+          "type": "number",
+          "default": 40,
+          "description": "Maximum number of diff files to include in the prompt."
+        },
+        "jiraTasks.maxCharsPerFile": {
+          "type": "number",
+          "default": 6000,
+          "description": "Maximum characters per diff file included in the prompt."
+        },
+        "jiraTasks.storageFile": {
+          "type": "string",
+          "default": "jira-tasks.md",
+          "description": "Workspace-relative path to the Jira tasks markdown file."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "bun run build.ts",
+    "compile": "bun run build.ts",
+    "watch": "bun run build.ts --watch",
+    "test:unit": "bun test",
+    "test:e2e": "bun run compile && node ./test/runTest.js"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "groq-sdk": "^0.8.0",
+    "ignore": "^5.3.1",
+    "openai": "^4.88.0",
+    "remark": "^15.0.1",
+    "simple-git": "^3.27.0",
+    "unified": "^11.0.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@vscode/test-electron": "^2.4.1",
+    "@types/node": "^22.13.1",
+    "@types/vscode": "^1.101.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "bun-types": "^1.0.28",
+    "eslint": "^9.19.0",
+    "mocha": "^10.8.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3"
+  }
+}

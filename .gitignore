@@ -76,7 +76,9 @@ web_modules/
 
 # Next.js build output
 .next
-out
+
+# VS Code extension build output
+out/
 
 # Nuxt.js build / generate output
 .nuxt
