@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { LLMPort } from "../../domain/ports/llmPort";
+import { requireContent } from "./llmResponse";
 
 export type OpenRouterOptions = {
   apiKey: string;
@@ -49,11 +50,6 @@ export class OpenRouterStrategy implements LLMPort {
       top_p: this.options.topP,
     });
 
-    const content = response.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("OpenRouter response missing content.");
-    }
-
-    return content;
+    return requireContent(response.choices?.[0]?.message?.content, "OpenRouter");
   }
 }

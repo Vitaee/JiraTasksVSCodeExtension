@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { DiffMode } from "../domain/ports/gitPort";
 
-export type ProviderType = "openrouter" | "groq";
+export type ProviderType = "openrouter" | "groq" | "ollama";
 
 export type ExtensionSettings = {
   provider: ProviderType;
@@ -10,6 +10,8 @@ export type ExtensionSettings = {
   openrouterSiteUrl: string;
   openrouterTitle: string;
   groqModel: string;
+  ollamaBaseUrl: string;
+  ollamaModel: string;
   promptLanguage: string;
   customInstructions: string;
   diffMode: DiffMode;
@@ -37,6 +39,8 @@ export function readSettings(): ExtensionSettings {
     openrouterSiteUrl: config.get("openrouterSiteUrl", ""),
     openrouterTitle: config.get("openrouterTitle", ""),
     groqModel: config.get("groqModel", "moonshotai/kimi-k2-instruct-0905"),
+    ollamaBaseUrl: config.get("ollamaBaseUrl", "http://localhost:11434"),
+    ollamaModel: config.get("ollamaModel", "llama3.1"),
     promptLanguage: config.get("promptLanguage", "en"),
     customInstructions: config.get("customInstructions", ""),
     diffMode: config.get<DiffMode>("diffMode", "staged+unstaged"),

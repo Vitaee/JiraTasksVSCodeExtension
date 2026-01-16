@@ -3,6 +3,7 @@ import { LLMPort } from "../../domain/ports/llmPort";
 import { SecretStorePort } from "../../domain/ports/secretStorePort";
 import { UserFacingError } from "../../shared/errors";
 import { GroqStrategy } from "./groqStrategy";
+import { OllamaStrategy } from "./ollamaStrategy";
 import { OpenRouterStrategy } from "./openRouterStrategy";
 
 export async function createLlmStrategy(
@@ -24,6 +25,16 @@ export async function createLlmStrategy(
       model: settings.openrouterModel,
       siteUrl: settings.openrouterSiteUrl,
       title: settings.openrouterTitle,
+      temperature: settings.temperature,
+      maxCompletionTokens: settings.maxCompletionTokens,
+      topP: settings.topP,
+    });
+  }
+
+  if (settings.provider === "ollama") {
+    return new OllamaStrategy({
+      baseUrl: settings.ollamaBaseUrl,
+      model: settings.ollamaModel,
       temperature: settings.temperature,
       maxCompletionTokens: settings.maxCompletionTokens,
       topP: settings.topP,

@@ -5,7 +5,7 @@ import { createLlmStrategy } from "../adapters/llm/llmFactory";
 import { MarkdownStorageAdapter } from "../adapters/storage/markdownStorageAdapter";
 import { VsCodeFileSystem } from "../adapters/vscode/vscodeFileSystem";
 import { VsCodeSecretStore } from "../adapters/vscode/vscodeSecretStore";
-import { readSettings } from "../config/settings";
+import { ExtensionSettings, readSettings } from "../config/settings";
 import { JIRA_TASK_PROMPT_TEMPLATE } from "../domain/prompts/jiraTaskPrompt";
 import { JIRA_TASK_REPAIR_PROMPT_TEMPLATE } from "../domain/prompts/jiraTaskRepairPrompt";
 import { ContextPruner } from "../domain/services/contextPruner";
@@ -21,10 +21,19 @@ export type TaskGeneratorBundle = {
   settings: ReturnType<typeof readSettings>;
 };
 
+export async function buildLlmClient(
+  context: vscode.ExtensionContext,
+  settings: ExtensionSettings
+) {
+  const secrets = new VsCodeSecretStore(context.secrets);
+  return await createLlmStrategy(settings, secrets);
+}
+
 export async function buildTaskGenerator(
   context: vscode.ExtensionContext
 ): Promise<TaskGeneratorBundle> {
   const settings = readSettings();
+  const llm = await buildLlmClient(context, settings);
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
   if (!workspaceFolder) {
@@ -32,8 +41,6 @@ export async function buildTaskGenerator(
   }
 
   const git = new SimpleGitAdapter(workspaceFolder.uri.fsPath);
-  const secrets = new VsCodeSecretStore(context.secrets);
-  const llm = await createLlmStrategy(settings, secrets);
 
   const fileSystem = new VsCodeFileSystem(workspaceFolder.uri);
   const storage = new MarkdownStorageAdapter(fileSystem, settings.storageFile);

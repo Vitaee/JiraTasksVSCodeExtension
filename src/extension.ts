@@ -19,10 +19,16 @@ export function activate(context: vscode.ExtensionContext): void {
     () => controller.setGroqKey()
   );
 
+  const testConnectionCommand = vscode.commands.registerCommand(
+    "jiraTasks.testConnection",
+    () => controller.testConnection()
+  );
+
   context.subscriptions.push(
     generateCommand,
     setOpenRouterKeyCommand,
-    setGroqKeyCommand
+    setGroqKeyCommand,
+    testConnectionCommand
   );
 }
 

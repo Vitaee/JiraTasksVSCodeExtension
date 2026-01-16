@@ -1,6 +1,6 @@
 # Jira Tasks Generator (VS Code Extension)
 
-Generate Jira task drafts from git changes and store them in a workspace markdown file. The extension uses a clean architecture split (ports and adapters) and supports OpenRouter and Groq.
+Generate Jira task drafts from git changes and store them in a workspace markdown file. The extension uses a clean architecture split (ports and adapters) and supports OpenRouter, Groq, and Ollama.
 
 ## Overview
 - Reads staged or unstaged diffs and prunes context using `.gitignore` and `.llmignore`.
@@ -19,7 +19,8 @@ Open this repo in VS Code and press `F5` to launch the Extension Development Hos
 ## Setup
 - Requirements: VS Code 1.101+, Bun for build/test, and a git workspace with changes.
 - Choose a provider in settings: `jiraTasks.provider`.
-- Set the API key with `Jira: Set OpenRouter API Key` or `Jira: Set Groq API Key`.
+- For OpenRouter or Groq, set the API key with `Jira: Set OpenRouter API Key` or `Jira: Set Groq API Key`.
+- For Ollama, make sure the local server is running and the model is pulled.
 - Run `Jira: Generate Task From Git Changes`. The task is saved to `jiraTasks.storageFile`.
 
 ## Testing
@@ -30,18 +31,21 @@ Open this repo in VS Code and press `F5` to launch the Extension Development Hos
 - `Jira: Generate Task From Git Changes` - generate and save a task based on git diffs.
 - `Jira: Set OpenRouter API Key` - store OpenRouter key in VS Code SecretStorage.
 - `Jira: Set Groq API Key` - store Groq key in VS Code SecretStorage.
+- `Jira: Test LLM Connection` - validate provider credentials and connectivity.
 
 ## Configuration
 Settings live under the `jiraTasks` namespace.
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `provider` | `openrouter` | Selects the LLM provider (`openrouter` or `groq`). |
+| `provider` | `openrouter` | Selects the LLM provider (`openrouter`, `groq`, or `ollama`). |
 | `openrouterBaseUrl` | `https://openrouter.ai/api/v1` | Base URL for OpenRouter requests. |
 | `openrouterModel` | `nvidia/nemotron-3-nano-30b-a3b:free` | Model identifier for OpenRouter. |
 | `openrouterSiteUrl` | `` | Optional HTTP-Referer header for OpenRouter rankings. |
 | `openrouterTitle` | `` | Optional X-Title header for OpenRouter rankings. |
 | `groqModel` | `moonshotai/kimi-k2-instruct-0905` | Model identifier for Groq. |
+| `ollamaBaseUrl` | `http://localhost:11434` | Base URL for Ollama (OpenAI-compatible endpoint uses `/v1`). |
+| `ollamaModel` | `llama3.1` | Model identifier for Ollama. |
 | `promptLanguage` | `en` | Language for generated Jira tasks. |
 | `customInstructions` | `` | Extra instructions appended to the prompt. |
 | `diffMode` | `staged+unstaged` | Diff scope: `staged`, `unstaged`, or `staged+unstaged`. |

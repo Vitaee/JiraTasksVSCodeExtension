@@ -1,5 +1,6 @@
 import { Groq } from "groq-sdk";
 import { LLMPort } from "../../domain/ports/llmPort";
+import { requireContent } from "./llmResponse";
 
 export type GroqOptions = {
   apiKey: string;
@@ -26,11 +27,6 @@ export class GroqStrategy implements LLMPort {
       stream: false,
     });
 
-    const content = response.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("Groq response missing content.");
-    }
-
-    return content;
+    return requireContent(response.choices?.[0]?.message?.content, "Groq");
   }
 }

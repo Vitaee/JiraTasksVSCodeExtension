@@ -27,6 +27,8 @@ function baseSettings(): ExtensionSettings {
     openrouterSiteUrl: "",
     openrouterTitle: "",
     groqModel: "moonshotai/kimi-k2-instruct-0905",
+    ollamaBaseUrl: "http://localhost:11434",
+    ollamaModel: "llama3.1",
     promptLanguage: "en",
     customInstructions: "",
     diffMode: "staged+unstaged",
